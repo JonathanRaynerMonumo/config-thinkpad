@@ -30,7 +30,7 @@ zstyle ':vcs_info:git:*' formats '%F{red}(branch: %b)%f '
 
 # Prompt Configuration
 setopt PROMPT_SUBST                    # allows for prompt expansion
-PROMPT='%F{208}%n@%M:%F{226}%~ %f${vcs_info_msg_0_}'
+PROMPT='%F{208}%n@%F{039}%M%f:%F{226}%~ %f${vcs_info_msg_0_}'
 
 # Node Version Manager
 source /usr/share/nvm/init-nvm.sh
