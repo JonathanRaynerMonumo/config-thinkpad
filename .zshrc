@@ -5,6 +5,8 @@ SAVEHIST=1000
 bindkey -v  # vim keybindings
 # End of lines configured by zsh-newuser-install
 
+autoload -Uz compinit
+
 # Don't pollute $HOME with zcompdump files, instead save here
 compinit -d "$HOME/.cache/zsh/zcompdump-$ZSH_VERSION-$HOST"
 
@@ -19,7 +21,7 @@ autoload -U +X bashcompinit && bashcompinit
 
 # prompt format
 setopt PROMPT_SUBST
-source /home/jonathan/git-repos/config/scm-prompt.sh
+source "$HOME/git_repos/config/scm-prompt.sh"
 PROMPT='%F{208}%n@%F{039}%M%F{226}:%~%F{red}$(_scm_prompt) '
 
 # Prefer vim or else fail over to vi
@@ -57,5 +59,4 @@ if ! pgrep -u "$USER" ssh-agent > /dev/null; then
 fi
 if [[ ! -f "$SSH_AUTH_SOCK" ]]; then
     source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
-    ssh-add ~/.ssh/github ~/.ssh/aur
 fi
