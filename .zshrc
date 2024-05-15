@@ -7,6 +7,12 @@ bindkey -v  # vim keybindings
 
 autoload -Uz compinit
 
+# where is our config repo
+CONFIG_REPO="$HOME/git_repos/config"
+
+# add any custom zsh completions from our chosen dir before compinit
+fpath=("$CONFIG_REPO/zsh_custom_completions" $fpath)
+
 # Don't pollute $HOME with zcompdump files, instead save here
 compinit -d "$HOME/.cache/zsh/zcompdump-$ZSH_VERSION-$HOST"
 
@@ -21,16 +27,15 @@ autoload -U +X bashcompinit && bashcompinit
 
 # prompt format
 setopt PROMPT_SUBST
-source "$HOME/git_repos/config/scm-prompt.sh"
+source "$CONFIG_REPO/scm-prompt.sh"
 PROMPT='%F{208}%n@%F{039}%M%F{226}:%~%F{red}$(_scm_prompt) '
 
 # Prefer vim or else fail over to vi
-EDITOR="$(command -v vim 2>/dev/null || command -v vi)"
-VISUAL="$(command -v vim 2>/dev/null || command -v vi)"
+export EDITOR="$(command -v vim 2>/dev/null || command -v vi)"
+export VISUAL="$(command -v vim 2>/dev/null || command -v vi)"
 
 # Node Version Manager
 source /usr/share/nvm/init-nvm.sh
-
 
 # Avoid stale environment variables (like for SSH forwarding) when rejoing tmux sessions
 function update_env_in_tmux() {
