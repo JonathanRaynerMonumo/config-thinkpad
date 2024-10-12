@@ -8,7 +8,7 @@ bindkey -v  # vim keybindings
 autoload -Uz compinit
 
 # where is our config repo
-CONFIG_REPO="$HOME/git_repos/config"
+CONFIG_REPO="$HOME/git-repos/config"
 
 # add any custom zsh completions from our chosen dir before compinit
 fpath=("$CONFIG_REPO/zsh_custom_completions" $fpath)
@@ -26,16 +26,35 @@ zstyle ':completion:*' menu select                       # menu selection for co
 autoload -U +X bashcompinit && bashcompinit
 
 # prompt format
+# git repo prompt stuff
+autoload -Uz vcs_info
+precmd() { vcs_info }
+# Format the vcs_info_msg_0_ variable
+zstyle ':vcs_info:git:*' formats '%F{red}(branch: %b)%f '
+
 setopt PROMPT_SUBST
-source "$CONFIG_REPO/scm-prompt.sh"
-PROMPT='%F{208}%n@%F{039}%M%F{226}:%~%F{red}$(_scm_prompt) '
+source "$CONFIG_REPO/jj-prompt.sh"
+
+# Fallback to Git if jj unavailable
+_my_theme_vcs_info() {
+  # Get the jj info
+  local jj_info=$(jj_prompt_template 'self.change_id().shortest()' 2>/dev/null)
+  
+  # If jj info exists, format it with brackets and 1 space
+  if [[ -n "$jj_info" ]]; then
+    echo "(${jj_info}) "
+  else
+    # Fallback to Git branch info
+    echo "${vcs_info_msg_0_}"
+  fi
+}
+
+PROMPT='%F{208}%n@%F{039}%M%F{226}:%~%F{red} $(_my_theme_vcs_info)'
+#PROMPT='%F{208}%n@%F{039}%M%F{226}:%~%F{red} ${vcs_info_msg_0_}'
 
 # Prefer vim or else fail over to vi
 export EDITOR="$(command -v vim 2>/dev/null || command -v vi)"
 export VISUAL="$(command -v vim 2>/dev/null || command -v vi)"
-
-# Node Version Manager
-source /usr/share/nvm/init-nvm.sh
 
 # Avoid stale environment variables (like for SSH forwarding) when rejoing tmux sessions
 function update_env_in_tmux() {
@@ -47,11 +66,8 @@ autoload -Uz add-zsh-hook
 add-zsh-hook precmd update_env_in_tmux
 
 # Plugins
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-# minio client
-complete -o nospace -C /usr/bin/mcli mcli
+source /home/jonathan/git-repos/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # pyenv
 export PYENV_ROOT="$HOME/.pyenv"
@@ -65,3 +81,16 @@ fi
 if [[ ! -f "$SSH_AUTH_SOCK" ]]; then
     source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
 fi
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# rust/cargo stuff
+PATH="$HOME/.cargo/bin:${PATH}"
+
+# jujutsu completions
+source <(jj util completion zsh)
+
+
+. "$HOME/.cargo/env"
